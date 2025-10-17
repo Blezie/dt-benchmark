@@ -1,0 +1,58 @@
+db: postgres   # choose: postgres | mongodb | influxdb, per run
+
+images:
+  postgres: postgres:17.6
+  mongodb: mongo:8.0
+  influxdb: influxdb:3.4.0-core
+
+postgres:
+  dsn: postgresql://postgres:postgres@localhost:5432/postgres
+  table: measurements
+
+mongodb:
+  uri: mongodb://localhost:27017
+  database: dtbench
+  collection: measurements
+  time_field: ts
+  meta_field: sensor_id
+
+influxdb:
+  host: http://localhost:8181
+  token_env: INFLUX_TOKEN
+  database: dtbench
+  measurement: measurements
+
+scales:
+  - { name: small,  sensors: 100,  hz: 1 }
+  - { name: medium, sensors: 1000, hz: 1 }
+  - { name: large,  sensors: 5000, hz: 2 }
+
+workload:
+  batch_size: 500
+  preload_seconds: 3600
+  warmup: 60
+  measure: 300
+  cooldown: 60
+  repeats: 3
+  tz: UTC
+
+queries:
+  qps: { W1: 20, W2: 5, W3: 2, W4: 1 }
+  windows:
+    w2_last_seconds: 300
+    w3_last_seconds: 3600
+    w3_bucket_seconds: 60
+    w4_last_seconds: 300
+    w4_topk: 10
+
+metrics:
+  docker_stats: true
+  docker_stats_interval_s: 1
+  containers:
+    postgres: { name: dtbench-pg,     data_dir: /var/lib/postgresql/data }
+    mongodb:  { name: dtbench-mongo,  data_dir: /data/db }
+    influxdb: { name: dtbench-influx, data_dir: /var/lib/influxdb3 }
+  latency_percentiles: [50, 95, 99]
+
+out_dir: ./results
+seed: 42

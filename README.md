@@ -6,7 +6,7 @@ Python benchmarking for PostgreSQL, MongoDB, and InfluxDB under simulated Digita
 
 1. Install Docker Desktop and Python 3.
 
-2. Start one database at a time using the official Docker image (default config).
+2. Select one database in config.yaml, then start it using: python scripts/run_db.py up. This launches the selected database based on your configuration. To stop it, run: python scripts/run_db.py down
 
 3. Run the Python workload generator to ingest and query concurrently; export results to CSV; plot with matplotlib/pandas.
 

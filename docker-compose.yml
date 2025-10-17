@@ -1,0 +1,48 @@
+version: "3.9"
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE}
+    container_name: ${POSTGRES_NAME}
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports: ["5432:5432"]
+    volumes: ["dtbench_pg:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  mongodb:
+    image: ${MONGODB_IMAGE}
+    container_name: ${MONGODB_NAME}
+    restart: unless-stopped
+    ports: ["27017:27017"]
+    volumes: ["dtbench_mongo:/data/db"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  influxdb:
+    image: ${INFLUXDB_IMAGE}
+    container_name: ${INFLUXDB_NAME}
+    restart: unless-stopped
+    ports: ["8181:8181"]
+    volumes: ["dtbench_influx:/var/lib/influxdb3"]
+    command: ["influxdb3","serve",
+          "--object-store","file",
+          "--data-dir","/var/lib/influxdb3",
+          "--node-id","node1"]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8181/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+volumes:
+  dtbench_pg:
+  dtbench_mongo:
+  dtbench_influx:
